@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emprendedor MX — Simulador de Negocios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tablericons/3.19.0/webfont/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#FFFEF7;--bg2:#F5F3FF;--bg3:#EDE9FE;
+  --p900:#1E1245;--p800:#2E1A6E;--p700:#3C2091;--p600:#4C1D95;--p500:#6D28D9;--p400:#7C3AED;--p300:#A78BFA;--p200:#C4B5FD;--p100:#DDD6FE;--p50:#EDE9FE;
+  --g900:#1C1917;--g700:#44403C;--g500:#78716C;--g300:#D6D3D1;--g100:#F5F5F4;
+  --success:#065F46;--success-bg:#D1FAE5;--success-border:#6EE7B7;
+  --danger:#991B1B;--danger-bg:#FEE2E2;--danger-border:#FCA5A5;
+  --warn:#92400E;--warn-bg:#FEF3C7;--warn-border:#FCD34D;
+  --gold:#B45309;--gold-bg:#FFFBEB;
+  --radius:8px;--radius-lg:12px;--radius-xl:16px;
+  --shadow:0 1px 3px rgba(76,29,149,.08),0 1px 2px rgba(76,29,149,.06);
+  --shadow-md:0 4px 6px rgba(76,29,149,.07),0 2px 4px rgba(76,29,149,.06);
+}
+html,body{height:100%;background:var(--bg);color:var(--g900);font-family:'Lora',Georgia,serif}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,serif}
+.mono{font-family:'IBM Plex Mono',monospace}
+a{color:var(--p500);text-decoration:none}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--p50)}
+::-webkit-scrollbar-thumb{background:var(--p300);border-radius:10px}
+
+/* ── INPUTS ── */
+input,select,textarea{
+  width:100%;padding:9px 12px;border:1.5px solid var(--p100);border-radius:var(--radius);
+  font-family:'Lora',serif;font-size:13px;background:white;color:var(--g900);transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--p400);box-shadow:0 0 0 3px rgba(167,139,250,.15)}
+input::placeholder{color:var(--g500)}
+label.field-label{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--g500);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+
+/* ── BUTTONS ── */
+button{
+  cursor:pointer;font-family:'Lora',serif;font-size:13px;font-weight:700;
+  border-radius:var(--radius);border:1.5px solid var(--p100);
+  background:var(--bg2);color:var(--p700);
+  padding:8px 16px;transition:all .15s;letter-spacing:.3px;
+}
+button:hover{background:var(--p50);border-color:var(--p200)}
+button:active{transform:scale(.98)}
+button.btn-primary{background:var(--p600);color:white;border-color:var(--p800);box-shadow:var(--shadow)}
+button.btn-primary:hover{background:var(--p700)}
+button.btn-success{background:var(--success);color:white;border-color:#064E3B}
+button.btn-success:hover{background:#064E3B}
+button.btn-danger{background:var(--danger);color:white;border-color:#7F1D1D}
+button.btn-danger:hover{background:#7F1D1D}
+button.btn-sm{padding:4px 10px;font-size:11px;font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── CARDS ── */
+.card{background:white;border:1.5px solid var(--p100);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow)}
+.card-purple{background:var(--p50);border:1.5px solid var(--p200);border-radius:var(--radius-lg);padding:16px}
+.receipt{background:var(--bg);border:1.5px dashed var(--p300);border-radius:var(--radius-lg);padding:16px;font-family:'IBM Plex Mono',monospace}
+
+/* ── BADGES ── */
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.badge-purple{background:var(--p50);color:var(--p700);border:1px solid var(--p200)}
+.badge-green{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.badge-red{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
+.badge-amber{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-border)}
+.badge-gray{background:var(--g100);color:var(--g700);border:1px solid var(--g300)}
+
+/* ── LAYOUT ── */
+#root{min-height:100vh}
+.container{max-width:860px;margin:0 auto;padding:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.grid-5{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px}
+@media(max-width:640px){.grid-3{grid-template-columns:1fr 1fr}.grid-4{grid-template-columns:1fr 1fr}.grid-5{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:480px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.grid-5{grid-template-columns:1fr 1fr}}
+
+/* ── KPI BOXES ── */
+.kpi-box{background:white;border:1.5px solid var(--p100);border-radius:var(--radius-lg);padding:14px;text-align:center}
+.kpi-label{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--g500);margin-bottom:6px}
+.kpi-value{font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;line-height:1.2}
+.kpi-sub{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--g500);margin-top:3px}
+
+/* ── ROW LINES ── */
+.row-line{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--p50);font-size:13px}
+.row-line .rl-label{color:var(--g500)}
+.row-line .rl-value{font-family:'IBM Plex Mono',monospace;font-weight:500}
+
+/* ── HEADER ── */
+.header{background:var(--p900);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12}
+.header-logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#EDE9FE;letter-spacing:1px}
+.header-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--p300);letter-spacing:.5px;margin-top:2px}
+.header-co{text-align:right}
+.header-co-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--p100);font-weight:700}
+.header-co-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--p300);margin-top:2px}
+
+/* ── STATUS BAR ── */
+.status-bar{background:var(--p50);border-bottom:1.5px solid var(--p100);padding:7px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:12px;font-family:'IBM Plex Mono',monospace}
+
+/* ── NAV TABS ── */
+.nav-tabs{background:white;border-bottom:2px solid var(--p100);display:flex;gap:0;overflow-x:auto;padding:0 12px}
+.nav-tab{padding:10px 12px;border:none;background:transparent;color:var(--g500);font-family:'Lora',serif;font-size:12px;font-weight:400;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:color .15s;display:flex;align-items:center;gap:5px}
+.nav-tab:hover{color:var(--p600)}
+.nav-tab.active{color:var(--p700);font-weight:700;border-bottom-color:var(--p500)}
+
+/* ── SECTION TITLE ── */
+.section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--p800);margin-bottom:14px;padding-bottom:8px;border-bottom:2px dashed var(--p200)}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--p700);padding:8px 10px;background:var(--p50);text-align:left;font-weight:600}
+.data-table td{padding:9px 10px;border-bottom:1px solid var(--p50)}
+.data-table tr:hover td{background:var(--bg2)}
+
+/* ── SETUP SCREENS ── */
+.setup-wrap{min-height:100vh;background:linear-gradient(135deg,var(--p800) 0%,var(--p500) 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.setup-card{background:white;border-radius:var(--radius-xl);padding:32px;width:100%;max-width:620px;box-shadow:0 20px 60px rgba(30,18,69,.3);border:3px solid var(--p200)}
+.setup-logo{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--p800);letter-spacing:1px}
+.setup-step{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--g500);letter-spacing:.5px;margin-top:4px}
+.progress-dots{display:flex;gap:8px;justify-content:center;margin:12px 0 24px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--p200)}
+.dot.active{background:var(--p600)}
+
+/* ── GIRO GRID ── */
+.giro-option{padding:10px 12px;border:1.5px solid var(--p100);border-radius:var(--radius);cursor:pointer;font-family:'Lora',serif;font-size:12px;font-weight:400;color:var(--g900);transition:all .15s;background:white;text-align:left;display:block;width:100%}
+.giro-option:hover{border-color:var(--p300);background:var(--p50)}
+.giro-option.selected{border-color:var(--p600);border-width:2px;background:var(--p50);color:var(--p800);font-weight:700}
+.seg-option{padding:12px;border:1.5px solid var(--p100);border-radius:var(--radius);cursor:pointer;background:white;text-align:center;transition:all .15s}
+.seg-option:hover{border-color:var(--p300)}
+.seg-option.selected{border-color:var(--p600);border-width:2px;background:var(--p50)}
+.budget-option{padding:10px 6px;border:1.5px solid var(--p100);border-radius:var(--radius);cursor:pointer;background:white;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--g700);transition:all .15s}
+.budget-option:hover{border-color:var(--p300);background:var(--p50)}
+.budget-option.selected{border-color:var(--p600);border-width:2px;background:var(--p50);color:var(--p800)}
+
+/* ── EVENT CARDS ── */
+.event-good{background:var(--success-bg);border:1.5px solid var(--success-border);border-radius:var(--radius-lg);padding:12px}
+.event-bad{background:var(--danger-bg);border:1.5px solid var(--danger-border);border-radius:var(--radius-lg);padding:12px}
+.event-cost{background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:var(--radius-lg);padding:12px}
+.event-neutral{background:var(--p50);border:1.5px solid var(--p200);border-radius:var(--radius-lg);padding:12px}
+.event-legal{background:var(--danger-bg);border:1.5px solid var(--danger-border);border-radius:var(--radius-lg);padding:12px}
+.event-hr{background:var(--warn-bg);border:1.5px solid var(--warn-border);border-radius:var(--radius-lg);padding:12px}
+
+/* ── CHECKLIST ── */
+.check-ok{color:var(--success);font-size:12px;display:flex;align-items:center;gap:6px;padding:4px 0}
+.check-warn{color:var(--warn);font-size:12px;display:flex;align-items:center;gap:6px;padding:4px 0}
+.check-err{color:var(--danger);font-size:12px;display:flex;align-items:center;gap:6px;padding:4px 0}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+.fade-in{animation:fadeIn .3s ease}
+.slide-in{animation:slideIn .3s ease}
+
+/* ── MISC ── */
+.text-pos{color:var(--success)}.text-neg{color:var(--danger)}.text-warn{color:var(--warn)}.text-purple{color:var(--p700)}
+.divider{border:none;border-top:1px dashed var(--p200);margin:12px 0}
+.info-box{background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--warn);line-height:1.6}
+.info-purple{background:var(--p50);border:1px solid var(--p200);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--p700);line-height:1.6}
+.scrollable{max-height:280px;overflow-y:auto;padding-right:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════
+const GIROS=[
+  {id:'rest', n:'🍽️ Restaurante / Fonda / Comida',         base:120,ticket:180,rent:8000, stock:15000},
+  {id:'ropa', n:'👗 Tienda de Ropa / Boutique',             base:80, ticket:350,rent:10000,stock:25000},
+  {id:'sal',  n:'💄 Salón de Belleza / Estética',           base:90, ticket:250,rent:7000, stock:8000},
+  {id:'vet',  n:'🐾 Clínica Veterinaria',                   base:60, ticket:400,rent:9000, stock:12000},
+  {id:'abarr',n:'🛒 Tienda de Abarrotes / Miscelánea',      base:200,ticket:80, rent:5000, stock:20000},
+  {id:'dig',  n:'💻 Agencia Digital / Software',            base:20, ticket:5000,rent:6000,stock:3000},
+  {id:'tall', n:'🔧 Taller Mecánico / Automotriz',          base:50, ticket:800,rent:10000,stock:18000},
+  {id:'pap',  n:'📚 Papelería / Librería',                  base:150,ticket:100,rent:6000, stock:15000},
+  {id:'gym',  n:'🏋️ Gimnasio / Centro Fitness',             base:80, ticket:400,rent:15000,stock:5000},
+  {id:'farm', n:'💊 Farmacia / Salud',                      base:130,ticket:250,rent:8000, stock:30000},
+  {id:'cons', n:'📋 Consultoría / Despacho Profesional',    base:15, ticket:5000,rent:5000,stock:2000},
+  {id:'ecom', n:'📦 E-commerce / Tienda en Línea',          base:50, ticket:700,rent:3000, stock:20000},
+];
+const SEGS=[
+  {id:'pop', n:'🏘️ Popular',        m:1.4,p:0.65,d:'Alto volumen, ticket bajo'},
+  {id:'med', n:'🏠 Clase Media',    m:1.0,p:1.0, d:'Balance estándar'},
+  {id:'mal', n:'🏡 Clase Media Alta',m:0.7,p:1.5,d:'Menor volumen, ticket alto'},
+  {id:'prem',n:'🏰 Premium / Lujo', m:0.4,p:2.8, d:'Exclusivo, ticket muy alto'},
+];
+const CITIES=['Ciudad de México','Guadalajara','Monterrey','Puebla','Tijuana','León','Mérida','Querétaro','Tlaquepaque','Zapopan','Culiacán','Torreón'];
+const MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const ROLES=['Gerente','Vendedor/a','Cajero/a','Almacenista','Intendencia','Chef / Cocinero/a','Técnico/a','Recepcionista','Mensajero/a','Supervisor/a'];
+const BUDGETS=[50000,100000,200000,500000,1000000];
+const EVENTS=[
+  {id:'quin', ico:'💰',n:'¡Es quincena!',              rev:0.25, cost:0,    fixed:0,    t:'good',  desc:'Los bolsillos están llenos. El consumo sube notablemente este mes.'},
+  {id:'gas',  ico:'⛽',n:'Alza en gasolina',            rev:0,    cost:0.08, fixed:0,    t:'cost',  desc:'La gasolina subió de precio. Tus costos de distribución y operación aumentan 8%.'},
+  {id:'inf',  ico:'📈',n:'Inflación al alza',           rev:0,    cost:0.07, fixed:0,    t:'cost',  desc:'La inflación sigue disparada. Insumos, materias primas y servicios cuestan 7% más.'},
+  {id:'comp', ico:'🏪',n:'Nuevo competidor en tu zona', rev:-0.15,cost:0,    fixed:0,    t:'bad',   desc:'Abrió competencia a 3 cuadras de tu local. Algunos de tus clientes pueden migrar.'},
+  {id:'vira', ico:'📱',n:'¡Tu negocio se viralizó!',    rev:0.5,  cost:0,    fixed:0,    t:'good',  desc:'Un TikTok o publicación sobre tu negocio se hizo viral. Clientes nuevos llegan.'},
+  {id:'rev',  ico:'⭐',n:'Mala reseña en Google Maps',  rev:-0.12,cost:0,    fixed:0,    t:'bad',   desc:'Una reseña de 1 estrella con muchos likes afecta tu reputación. Clientes -12%.'},
+  {id:'lluv', ico:'🌧️',n:'Lluvias torrenciales',        rev:-0.20,cost:0,    fixed:0,    t:'bad',   desc:'Semana de aguaceros en tu ciudad. Muy poca gente salió a comprar o contratar servicios.'},
+  {id:'temp', ico:'🎄',n:'Temporada alta',              rev:0.35, cost:0,    fixed:0,    t:'good',  desc:'Temporada de alta demanda (Navidad, Día de Muertos, Semana Santa, verano escolar).'},
+  {id:'apag', ico:'🔌',n:'Apagón de CFE',               rev:-0.15,cost:0,    fixed:0,    t:'bad',   desc:'CFE reportó fallas que afectaron 2 días de operaciones. Producción y ventas parciales.'},
+  {id:'dol',  ico:'💵',n:'Dólar al alza',               rev:0,    cost:0.09, fixed:0,    t:'cost',  desc:'El tipo de cambio subió $3 pesos. Los insumos importados se encarecen un 9%.'},
+  {id:'sat',  ico:'🏛️',n:'SAT solicita aclaraciones',   rev:0,    cost:0,    fixed:6000, t:'legal', desc:'El SAT envió un requerimiento de información. Necesitas asesoría fiscal urgente.'},
+  {id:'cofe', ico:'🔍',n:'Inspección sanitaria (COFEPRIS)',rev:0,  cost:0,    fixed:4000, t:'legal', desc:'COFEPRIS realizó una inspección en tu establecimiento. Se requieren adecuaciones.'},
+  {id:'prov', ico:'📦',n:'Proveedor principal sube precios',rev:0, cost:0.12, fixed:0,    t:'cost',  desc:'Tu proveedor principal aumentó sus listas de precios un 12%. Revisa tus márgenes.'},
+  {id:'cris', ico:'🏙️',n:'Crisis económica local',      rev:-0.12,cost:0,    fixed:0,    t:'bad',   desc:'La economía de tu ciudad muestra señales de contracción. El consumo disminuye.'},
+  {id:'calm', ico:'☀️',n:'Mes tranquilo y productivo',  rev:0.05, cost:0,    fixed:0,    t:'neutral',desc:'Sin contratiempos externos. Tu equipo trabajó al máximo. Pequeño bono de eficiencia.'},
+  {id:'norm', ico:'📅',n:'Mes sin novedades especiales',rev:0,    cost:0,    fixed:0,    t:'neutral',desc:'Operación completamente normal. Sin eventos externos relevantes este mes.'},
+  {id:'desc', ico:'🎁',n:'Descuento sorpresa de proveedor',rev:0,  cost:-0.10,fixed:0,    t:'good',  desc:'Tu proveedor te ofrece un descuento del 10% en tu pedido de este mes.'},
+  {id:'feri', ico:'🎡',n:'Feria o evento local cercano', rev:0.18,cost:0,    fixed:0,    t:'good',  desc:'Se realizó una feria o evento cerca de tu local. Mayor flujo de personas +18%.'},
+  {id:'luz',  ico:'💡',n:'Tarifa eléctrica alta (DAC)',  rev:0,    cost:0,    fixed:3000, t:'cost',  desc:'CFE te aplicó la tarifa DAC (alto consumo). Cargo extraordinario este mes.'},
+  {id:'ren',  ico:'👤',n:'Empleado clave renuncia',      rev:-0.08,cost:0,    fixed:0,    t:'hr',    desc:'Tu empleado con más experiencia renunció. La eficiencia operativa baja temporalmente.'},
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════════
+const $m = n => new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0}).format(Math.round(n||0));
+const $n = n => new Intl.NumberFormat('es-MX').format(Math.round(n||0));
+const pct= n => ((n||0)*100).toFixed(1)+'%';
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════════════════
+let G = {
+  view:'setup1', tab:'dash',
+  co:{name:'',giro:'',seg:'med',city:'Guadalajara',desc:'',budget:100000},
+  cash:0, debt:0, monthIdx:0,
+  products:[], inventory:[], employees:[],
+  rent:0, utilities:0, internet:500, licenses:500, otherFixed:0,
+  mktBudget:2000, mktChannel:'redes',
+  history:[], lastResult:null,
+  satisfaction:70, consLoss:0,
+  totalRev:0, totalExp:0,
+  isrAccum:0, ivaAccum:0,
+  nextProdId:1, nextEmpId:1, nextInvId:1,
+  chartRef:null,
+};
+
+// ── DERIVED ──
+const giro    = () => GIROS.find(g=>g.id===G.co.giro)||GIROS[0];
+const seg     = () => SEGS.find(s=>s.id===G.co.seg)||SEGS[1];
+const curMon  = () => MES[G.monthIdx%12];
+const curYear = () => 2025+Math.floor(G.monthIdx/12);
+const payroll = () => G.employees.reduce((s,e)=>s+(e.salary*1.32),0);
+const fixedTot= () => (G.rent||0)+(G.utilities||0)+(G.internet||0)+(G.licenses||0)+(G.otherFixed||0);
+const avgTicket=() => G.products.length ? G.products.reduce((s,p)=>s+p.price,0)/G.products.length : giro().ticket;
+const avgCost  =() => G.products.length ? G.products.reduce((s,p)=>s+p.cost,0)/G.products.length  : giro().ticket*0.45;
+const burnRate = () => fixedTot()+payroll()+(G.mktBudget||0);
+const runway   = () => burnRate()>0 ? Math.max(0,G.cash/burnRate()).toFixed(1) : '∞';
+const cashColor= () => G.cash<0?'var(--danger)':G.cash<burnRate()*2?'var(--warn)':'var(--success)';
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER ENGINE
+// ═══════════════════════════════════════════════════════════════════
+const render = () => {
+  if(G.chartRef){ try{G.chartRef.destroy();}catch(e){} G.chartRef=null; }
+  const root = document.getElementById('root');
+  root.innerHTML = '';
+  if(G.view==='setup1') buildSetup1(root);
+  else if(G.view==='setup2') buildSetup2(root);
+  else if(G.view==='setup3') buildSetup3(root);
+  else if(G.view==='results') buildResults(root);
+  else if(G.view==='bankrupt') buildEnd(root,'bankrupt');
+  else if(G.view==='success')  buildEnd(root,'success');
+  else buildGame(root);
+};
+
+// ── HTML HELPERS ──
+const div = (cls,html='',extra='') => `<div class="${cls}" ${extra}>${html}</div>`;
+const rowLine=(l,v,bold=false,cls='')=>`<div class="row-line"><span class="rl-label">${l}</span><span class="rl-value ${cls}" style="${bold?'font-weight:600':''}">${v}</span></div>`;
+const kpiBox=(lbl,val,cls='',sub='')=>`<div class="kpi-box"><div class="kpi-label">${lbl}</div><div class="kpi-value ${cls}">${val}</div>${sub?`<div class="kpi-sub">${sub}</div>`:''}</div>`;
+const badge=(txt,cls='badge-purple')=>`<span class="badge ${cls}">${txt}</span>`;
+const secTitle=txt=>`<div class="section-title serif">${txt}</div>`;
+const fieldGroup=(lbl,inputHtml)=>`<div><label class="field-label">${lbl}</label>${inputHtml}</div>`;
+
+// ═══════════════════════════════════════════════════════════════════
+// SETUP 1
+// ═══════════════════════════════════════════════════════════════════
+function buildSetup1(root){
+  root.innerHTML=`
+  <div class="setup-wrap">
+    <div class="setup-card fade-in">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="setup-logo">Emprendedor MX</div>
+        <div class="setup-step">SIMULADOR DE NEGOCIOS · MERCADO MEXICANO</div>
+        <div class="progress-dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+      <div class="serif" style="font-size:20px;color:var(--p800);margin-bottom:16px">Paso 1 — Tu negocio</div>
+      <div style="margin-bottom:14px">
+        ${fieldGroup('Nombre de la empresa','<input id="co-name" placeholder="Ej: Tacos El Güero, Studio Nova, VetCare Plus..." value="'+G.co.name+'">')}
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="field-label">Giro comercial</label>
+        <div class="grid-2 scrollable" id="giro-grid" style="gap:6px"></div>
+      </div>
+      <div style="margin-bottom:20px">
+        ${fieldGroup('Descripción breve (opcional)','<input id="co-desc" placeholder="¿Qué te hace diferente?" value="'+G.co.desc+'">')}
+      </div>
+      <div id="s1-err" style="color:var(--danger);font-size:12px;min-height:16px;margin-bottom:8px"></div>
+      <button class="btn-primary" id="s1-next" style="width:100%;padding:12px 0;font-size:15px">Continuar →</button>
+    </div>
+  </div>`;
+  
+  const gg = root.querySelector('#giro-grid');
+  GIROS.forEach(g=>{
+    const b = document.createElement('button');
+    b.className='giro-option'+(G.co.giro===g.id?' selected':'');
+    b.textContent=g.n;
+    b.onclick=()=>{ G.co.giro=g.id; gg.querySelectorAll('.giro-option').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); };
+    gg.appendChild(b);
+  });
+  root.querySelector('#s1-next').onclick=()=>{
+    G.co.name=root.querySelector('#co-name').value.trim();
+    G.co.desc=root.querySelector('#co-desc').value.trim();
+    if(!G.co.name){ root.querySelector('#s1-err').textContent='Escribe el nombre de tu empresa.'; return; }
+    if(!G.co.giro){ root.querySelector('#s1-err').textContent='Selecciona el giro de tu negocio.'; return; }
+    G.view='setup2'; render();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SETUP 2
+// ═══════════════════════════════════════════════════════════════════
+function buildSetup2(root){
+  root.innerHTML=`
+  <div class="setup-wrap">
+    <div class="setup-card fade-in">
+      <div style="text-align:center;margin-bottom:24px">
+        <div class="setup-logo">Emprendedor MX</div>
+        <div class="setup-step">MERCADO Y CAPITAL INICIAL · PASO 2 DE 3</div>
+        <div class="progress-dots"><div class="dot active"></div><div class="dot active"></div><div class="dot"></div></div>
+      </div>
+      <div class="serif" style="font-size:20px;color:var(--p800);margin-bottom:16px">Paso 2 — Mercado y capital</div>
+      <div style="margin-bottom:16px">
+        <label class="field-label">Segmento de mercado objetivo</label>
+        <div class="grid-2" id="seg-grid" style="gap:8px"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        ${fieldGroup('Ciudad / Municipio','<select id="co-city">'+CITIES.map(c=>`<option${c===G.co.city?' selected':''}>${c}</option>`).join('')+'</select>')}
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="field-label">Capital inicial disponible</label>
+        <div class="grid-5" id="budget-grid" style="gap:6px"></div>
+        <div id="budg-lbl" style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--p700);text-align:center;margin-top:8px;font-weight:600">Capital seleccionado: ${$m(G.co.budget)}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button style="padding:12px 20px;font-size:14px" onclick="G.view='setup1';render()">← Atrás</button>
+        <button class="btn-primary" style="flex:1;padding:12px 0;font-size:15px" id="s2-next">Continuar →</button>
+      </div>
+    </div>
+  </div>`;
+  
+  const sg=root.querySelector('#seg-grid');
+  SEGS.forEach(s=>{
+    const d=document.createElement('div');
+    d.className='seg-option'+(G.co.seg===s.id?' selected':'');
+    d.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--g900)">${s.n}</div><div style="font-size:11px;color:var(--g500);margin-top:3px">${s.d}</div>`;
+    d.onclick=()=>{ G.co.seg=s.id; sg.querySelectorAll('.seg-option').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); };
+    sg.appendChild(d);
+  });
+  
+  const bg=root.querySelector('#budget-grid');
+  BUDGETS.forEach(b=>{
+    const d=document.createElement('div');
+    d.className='budget-option'+(G.co.budget===b?' selected':'');
+    d.textContent=b>=1000000?'$1M':'$'+(b/1000)+'k';
+    d.onclick=()=>{ G.co.budget=b; bg.querySelectorAll('.budget-option').forEach(x=>x.classList.remove('selected')); d.classList.add('selected'); root.querySelector('#budg-lbl').textContent='Capital seleccionado: '+$m(b); };
+    bg.appendChild(d);
+  });
+  
+  root.querySelector('#s2-next').onclick=()=>{ G.co.city=root.querySelector('#co-city').value; G.view='setup3'; render(); };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SETUP 3
+// ═══════════════════════════════════════════════════════════════════
+function buildSetup3(root){
+  const g=GIROS.find(x=>x.id===G.co.giro)||GIROS[0];
+  const s=SEGS.find(x=>x.id===G.co.seg)||SEGS[1];
+  root.innerHTML=`
+  <div class="setup-wrap">
+    <div class="setup-card fade-in">
+      <div style="text-align:center;margin-bottom:20px">
+        <div class="setup-logo">¡Todo listo!</div>
+        <div class="setup-step">RESUMEN DE TU EMPRESA · PASO 3 DE 3</div>
+        <div class="progress-dots"><div class="dot active"></div><div class="dot active"></div><div class="dot active"></div></div>
+      </div>
+      <div class="receipt" style="margin-bottom:16px">
+        <div style="text-align:center;border-bottom:1px dashed var(--p300);padding-bottom:8px;margin-bottom:10px;font-size:11px;color:var(--p700);letter-spacing:1px">
+          ══════ ACTA CONSTITUTIVA ══════
+        </div>
+        ${rowLine('Razón social','<strong>'+G.co.name+'</strong>')}
+        ${rowLine('Giro',g.n)}
+        ${rowLine('Segmento objetivo',s.n)}
+        ${rowLine('Ciudad',G.co.city)}
+        ${rowLine('Capital inicial','<strong style="color:var(--p700)">'+$m(G.co.budget)+'</strong>')}
+        <hr class="divider">
+        <div style="font-size:11px;color:var(--g500);margin-bottom:6px;letter-spacing:.3px;text-transform:uppercase">Recomendaciones iniciales:</div>
+        <div style="font-size:12px;color:var(--g700);line-height:2">
+          → Renta mensual sugerida: <strong>${$m(g.rent)}</strong><br>
+          → Stock inicial sugerido: <strong>${$m(g.stock)}</strong><br>
+          → Contrata al menos 1–2 empleados para arrancar<br>
+          → Registra productos o servicios antes del primer mes
+        </div>
+      </div>
+      <div style="font-style:italic;font-size:12px;color:var(--g500);text-align:center;margin-bottom:16px;font-family:'Lora',serif">
+        "El éxito en los negocios es el resultado de disciplina, planificación y buen juicio."
+      </div>
+      <div style="display:flex;gap:8px">
+        <button style="padding:12px 20px;font-size:14px" onclick="G.view='setup2';render()">← Atrás</button>
+        <button class="btn-success" style="flex:1;padding:14px 0;font-size:16px;font-weight:900;letter-spacing:1px" id="start-btn">🚀 ¡ABRIR MI NEGOCIO!</button>
+      </div>
+    </div>
+  </div>`;
+  root.querySelector('#start-btn').onclick=()=>{
+    G.cash=G.co.budget;
+    const gd=GIROS.find(x=>x.id===G.co.giro)||GIROS[0];
+    G.rent=gd.rent; G.utilities=Math.round(gd.rent*0.15);
+    G.view='game'; G.tab='dash'; render();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GAME FRAME
+// ═══════════════════════════════════════════════════════════════════
+const TABS=[
+  {id:'dash',  ico:'<i class="ti ti-layout-dashboard"></i>',n:'Panel'},
+  {id:'cat',   ico:'<i class="ti ti-package"></i>',          n:'Catálogo'},
+  {id:'ins',   ico:'<i class="ti ti-shopping-cart"></i>',    n:'Insumos'},
+  {id:'nom',   ico:'<i class="ti ti-users"></i>',            n:'Nómina'},
+  {id:'ops',   ico:'<i class="ti ti-building-store"></i>',   n:'Operaciones'},
+  {id:'adv',   ico:'<i class="ti ti-calendar-event"></i>',   n:'Avanzar Mes'},
+  {id:'ana',   ico:'<i class="ti ti-chart-bar"></i>',        n:'Análisis'},
+  {id:'fis',   ico:'<i class="ti ti-receipt-tax"></i>',      n:'Fiscal'},
+];
+
+function buildGame(root){
+  const stTxt=G.cash<0?'En deuda':G.cash<burnRate()*2?'Precaución':'Estable';
+  const stBadge=G.cash<0?'badge-red':G.cash<burnRate()*2?'badge-amber':'badge-green';
+  
+  root.innerHTML=`
+  <div style="min-height:100vh;display:flex;flex-direction:column">
+    <!-- HEADER -->
+    <div class="header">
+      <div>
+        <div class="header-logo">Emprendedor MX</div>
+        <div class="header-sub">SIMULADOR DE NEGOCIOS · MERCADO MEXICANO</div>
+      </div>
+      <div class="header-co">
+        <div class="header-co-name">${G.co.name}</div>
+        <div class="header-co-meta">${curMon()} ${curYear()} · ${giro().n.split(' ').slice(1).join(' ')}</div>
+      </div>
+    </div>
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <span>💰 Efectivo: <strong style="color:${cashColor()};font-family:'IBM Plex Mono',monospace">${$m(G.cash)}</strong></span>
+      <span>🔥 Burn rate: <strong>${$m(burnRate())}/mes</strong></span>
+      <span>⏱️ Runway: <strong>${runway()} meses</strong></span>
+      <span>📅 Mes #${G.monthIdx+1}</span>
+      ${badge(stTxt,stBadge)}
+      <span style="margin-left:auto">Satisfacción: <strong>${G.satisfaction}%</strong> ${G.satisfaction>80?'⭐⭐⭐':G.satisfaction>60?'⭐⭐':'⭐'}</span>
+    </div>
+    <!-- TABS -->
+    <div class="nav-tabs" id="nav-tabs"></div>
+    <!-- CONTENT -->
+    <div style="flex:1;background:var(--bg)">
+      <div class="container" id="tab-content"></div>
+    </div>
+  </div>`;
+  
+  const nav=root.querySelector('#nav-tabs');
+  TABS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='nav-tab'+(G.tab===t.id?' active':'');
+    b.innerHTML=`${t.ico} ${t.n}`;
+    b.onclick=()=>{ G.tab=t.id; render(); };
+    nav.appendChild(b);
+  });
+  
+  const content=root.querySelector('#tab-content');
+  if(G.tab==='dash') buildDash(content);
+  else if(G.tab==='cat') buildCatalogo(content);
+  else if(G.tab==='ins') buildInsumos(content);
+  else if(G.tab==='nom') buildNomina(content);
+  else if(G.tab==='ops') buildOps(content);
+  else if(G.tab==='adv') buildAdvance(content);
+  else if(G.tab==='ana') buildAnalysis(content);
+  else if(G.tab==='fis') buildFiscal(content);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════════
+function buildDash(root){
+  const last=G.history[G.history.length-1];
+  const g=giro(), s=seg();
+  const totP=G.totalRev-G.totalExp;
+  
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Panel General — '+G.co.name)}
+    <div class="grid-4" style="margin-bottom:14px">
+      ${kpiBox('Efectivo en caja',$m(G.cash),G.cash<0?'text-neg':G.cash<burnRate()*2?'text-warn':'text-pos','en caja')}
+      ${kpiBox('Burn rate mensual',$m(burnRate()),'','runway: '+runway()+'m')}
+      ${kpiBox('Empleados',G.employees.length+'','','en nómina')}
+      ${kpiBox('Satisfacción',G.satisfaction+'%',G.satisfaction>70?'text-pos':G.satisfaction>50?'text-warn':'text-neg','del cliente')}
+    </div>
+    ${last?`
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:10px;font-family:'Playfair Display',serif">Último mes registrado — ${last.month} ${last.year}</div>
+      <div class="grid-3">
+        ${kpiBox('Ingresos',$m(last.revenue),'text-pos','')}
+        ${kpiBox('Egresos',$m(last.totalExp),'text-neg','')}
+        ${kpiBox('Utilidad neta',$m(last.profit),last.profit>=0?'text-pos':'text-neg',last.profit>=0?'ganancia':'pérdida')}
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--g500)">
+        Clientes atendidos: <strong>${$n(last.customers)}</strong> · 
+        Evento del mes: <strong>${last.eventIco} ${last.eventN}</strong>
+      </div>
+    </div>`:
+    `<div class="info-purple" style="margin-bottom:12px">
+      📊 Aquí verás el resumen de cada mes una vez que avances el tiempo. Configura tu negocio y haz clic en <strong>"Avanzar Mes"</strong> para comenzar.
+    </div>`}
+    <div class="card" style="margin-bottom:12px">
+      <div class="serif" style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:10px">Perfil del negocio</div>
+      ${rowLine('Giro comercial',g.n)}
+      ${rowLine('Segmento objetivo',s.n)}
+      ${rowLine('Ciudad',G.co.city)}
+      ${rowLine('Capital inicial',$m(G.co.budget))}
+      ${rowLine('Productos y servicios',G.products.length+' registrados')}
+      ${rowLine('Insumos en almacén',G.inventory.length+' artículos')}
+      ${rowLine('Meses operando',G.monthIdx+' meses')}
+    </div>
+    <div class="grid-3" style="margin-bottom:12px">
+      ${kpiBox('Ingresos acumulados',$m(G.totalRev),'text-pos',G.monthIdx+' meses')}
+      ${kpiBox('Egresos acumulados',$m(G.totalExp),'text-neg','')}
+      ${kpiBox('Resultado neto acumulado',$m(totP),totP>=0?'text-pos':'text-neg','')}
+    </div>
+    ${(G.products.length===0||G.rent===0)?`
+    <div class="info-box">
+      <strong>⚠️ Pendientes antes de tu primer mes:</strong><br>
+      ${G.products.length===0?'→ Ve a <strong>Catálogo</strong> y agrega al menos un producto o servicio<br>':''}
+      ${G.rent===0?'→ Ve a <strong>Operaciones</strong> y configura tu renta mensual<br>':''}
+    </div>`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CATÁLOGO
+// ═══════════════════════════════════════════════════════════════════
+function buildCatalogo(root){
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Catálogo de Productos y Servicios')}
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Agregar producto o servicio</div>
+      <div class="grid-2" style="gap:10px;margin-bottom:8px">
+        ${fieldGroup('Nombre del producto / servicio','<input id="pn" placeholder="Ej: Taco de canasta, Corte de cabello, Asesoría fiscal...">')}
+        ${fieldGroup('Categoría','<select id="pcat"><option value="producto">Producto</option><option value="servicio">Servicio</option></select>')}
+        ${fieldGroup('Precio de venta $MXN','<input id="pp" type="number" placeholder="0.00" min="0" step="0.01">')}
+        ${fieldGroup('Costo unitario $MXN','<input id="pc" type="number" placeholder="0.00" min="0" step="0.01">')}
+      </div>
+      <div id="prod-margin" style="font-family:'IBM Plex Mono',monospace;font-size:11px;min-height:18px;margin-bottom:8px"></div>
+      <button class="btn-primary" id="add-prod">+ Agregar al catálogo</button>
+    </div>
+    ${G.products.length?`
+    <div class="card" style="overflow:hidden;padding:0">
+      <table class="data-table">
+        <thead><tr>
+          <th>Producto / Servicio</th><th>Tipo</th>
+          <th style="text-align:right">Precio</th><th style="text-align:right">Costo</th>
+          <th style="text-align:right">Margen</th><th style="text-align:center">Estado</th><th></th>
+        </tr></thead>
+        <tbody>${G.products.map(p=>{
+          const mg=((p.price-p.cost)/p.price*100).toFixed(1);
+          const mc=mg>40?'text-pos':mg>25?'text-purple':mg>15?'text-warn':'text-neg';
+          const lbl=mg>50?['Excelente','badge-green']:mg>30?['Bueno','badge-purple']:mg>15?['Aceptable','badge-amber']:['Bajo','badge-red'];
+          return `<tr>
+            <td><strong>${p.name}</strong></td>
+            <td>${badge(p.cat==='servicio'?'Servicio':'Producto',p.cat==='servicio'?'badge-purple':'badge-gray')}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(p.price)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(p.cost)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700" class="${mc}">${mg}%</td>
+            <td style="text-align:center">${badge(lbl[0],lbl[1])}</td>
+            <td style="text-align:center"><button class="btn-danger btn-sm" onclick="G.products=G.products.filter(x=>x.id!==${p.id});render()">Quitar</button></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--g500);margin-top:8px;display:flex;gap:20px;flex-wrap:wrap">
+      <span>Ticket promedio: <strong style="color:var(--p700)">${$m(avgTicket())}</strong></span>
+      <span>Costo promedio: <strong style="color:var(--danger)">${$m(avgCost())}</strong></span>
+      <span>Margen promedio: <strong style="color:var(--success)">${avgTicket()>0?((avgTicket()-avgCost())/avgTicket()*100).toFixed(1):'0'}%</strong></span>
+    </div>`:
+    `<div style="text-align:center;padding:30px;color:var(--g500);font-size:13px;border:1.5px dashed var(--p200);border-radius:var(--radius-lg)">
+      Sin productos registrados. Agrega al menos uno para que el simulador pueda calcular tus ventas.
+    </div>`}
+  </div>`;
+  
+  root.querySelectorAll('#pp,#pc').forEach(inp=>inp.addEventListener('input',()=>{
+    const p=parseFloat(root.querySelector('#pp').value)||0;
+    const c=parseFloat(root.querySelector('#pc').value)||0;
+    const lbl=root.querySelector('#prod-margin');
+    if(p>0&&c>0){
+      const mg=((p-c)/p*100).toFixed(1);
+      const color=mg>40?'var(--success)':mg>25?'var(--p600)':mg>15?'var(--warn)':'var(--danger)';
+      lbl.style.color=color;
+      lbl.textContent=`Margen bruto: ${mg}% — ${mg>50?'Excelente':mg>30?'Bueno':mg>15?'Aceptable':'Por debajo del mínimo recomendado'}`;
+    } else lbl.textContent='';
+  }));
+  
+  root.querySelector('#add-prod').onclick=()=>{
+    const n=root.querySelector('#pn').value.trim();
+    const p=parseFloat(root.querySelector('#pp').value)||0;
+    const c=parseFloat(root.querySelector('#pc').value)||0;
+    const cat=root.querySelector('#pcat').value;
+    if(!n||p<=0||c<=0){ alert('Completa todos los campos.'); return; }
+    if(c>=p){ alert('⚠️ El costo no puede ser mayor o igual al precio de venta. Revisa tu margen.'); return; }
+    G.products.push({id:G.nextProdId++,name:n,price:p,cost:c,cat});
+    render();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INSUMOS
+// ═══════════════════════════════════════════════════════════════════
+function buildInsumos(root){
+  const invTotal=G.inventory.reduce((s,i)=>s+i.unitCost*i.qty,0);
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Compra de Insumos y Mercancía')}
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:10px;text-align:right">
+      Efectivo disponible: <strong style="color:${cashColor()}">${$m(G.cash)}</strong>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Nueva compra de insumos (descuenta de caja al instante)</div>
+      <div class="grid-3" style="gap:10px;margin-bottom:8px">
+        ${fieldGroup('Nombre del insumo / mercancía','<input id="in" placeholder="Ej: Harina, Telas, Aceite, Refacciones...">')}
+        ${fieldGroup('Costo por unidad $MXN','<input id="ic" type="number" placeholder="0.00" min="0" step="0.01">')}
+        ${fieldGroup('Cantidad a comprar','<input id="iq" type="number" placeholder="0" min="1">')}
+      </div>
+      <div id="inv-total" style="font-family:'IBM Plex Mono',monospace;font-size:12px;min-height:18px;margin-bottom:8px"></div>
+      <button class="btn-primary" id="buy-inv">Comprar insumo <i class="ti ti-shopping-cart"></i></button>
+    </div>
+    ${G.inventory.length?`
+    <div class="card" style="overflow:hidden;padding:0">
+      <table class="data-table">
+        <thead><tr>
+          <th>Insumo</th><th style="text-align:right">Costo unit.</th>
+          <th style="text-align:right">Cantidad</th><th style="text-align:right">Valor total</th><th></th>
+        </tr></thead>
+        <tbody>${G.inventory.map(i=>`<tr>
+          <td><strong>${i.name}</strong></td>
+          <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(i.unitCost)}</td>
+          <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$n(i.qty)}</td>
+          <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:600">${$m(i.unitCost*i.qty)}</td>
+          <td style="text-align:center"><button class="btn-sm" onclick="G.inventory=G.inventory.filter(x=>x.id!==${i.id});render()">Retirar</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--g500);margin-top:8px;text-align:right">
+      Valor total en almacén: <strong style="color:var(--p700)">${$m(invTotal)}</strong>
+    </div>`:
+    `<div style="text-align:center;padding:24px;color:var(--g500);font-size:13px;border:1.5px dashed var(--p200);border-radius:var(--radius-lg)">
+      Sin insumos en almacén. Compra materias primas o mercancía para que el simulador registre stock disponible.
+    </div>`}
+    <div class="info-purple" style="margin-top:10px">
+      💡 La disponibilidad de insumos afecta el modificador de operación mensual. Sin insumos, los clientes atendidos se reducen hasta un 45%.
+    </div>
+  </div>`;
+  
+  root.querySelectorAll('#ic,#iq').forEach(inp=>inp.addEventListener('input',()=>{
+    const c=parseFloat(root.querySelector('#ic').value)||0;
+    const q=parseFloat(root.querySelector('#iq').value)||0;
+    const lbl=root.querySelector('#inv-total');
+    if(c>0&&q>0){
+      const tot=c*q;
+      const ok=tot<=G.cash;
+      lbl.textContent=`Total a pagar: ${$m(tot)} — Efectivo disponible: ${$m(G.cash)}`;
+      lbl.style.color=ok?'var(--success)':'var(--danger)';
+    } else lbl.textContent='';
+  }));
+  
+  root.querySelector('#buy-inv').onclick=()=>{
+    const n=root.querySelector('#in').value.trim();
+    const c=parseFloat(root.querySelector('#ic').value)||0;
+    const q=parseInt(root.querySelector('#iq').value)||0;
+    if(!n||c<=0||q<=0){ alert('Completa todos los campos.'); return; }
+    const tot=c*q;
+    if(tot>G.cash){ alert(`💸 No tienes efectivo suficiente.\nNecesitas: ${$m(tot)}\nTienes: ${$m(G.cash)}`); return; }
+    G.cash-=tot;
+    const ex=G.inventory.find(i=>i.name===n);
+    if(ex){ ex.qty+=q; ex.lastCost=c; } else G.inventory.push({id:G.nextInvId++,name:n,unitCost:c,qty:q});
+    render();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// NÓMINA
+// ═══════════════════════════════════════════════════════════════════
+function buildNomina(root){
+  const pr=payroll();
+  const bruto=G.employees.reduce((s,e)=>s+e.salary,0);
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Nómina y Recursos Humanos')}
+    <div class="grid-3" style="margin-bottom:14px">
+      ${kpiBox('Empleados activos',G.employees.length,'','en plantilla')}
+      ${kpiBox('Salarios brutos mensuales',$m(bruto),'','')}
+      ${kpiBox('Costo real (con IMSS+INFONAVIT)',$m(pr),'text-neg','+32% sobre salario')}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Contratar nuevo empleado</div>
+      <div class="grid-3" style="gap:10px;margin-bottom:8px">
+        ${fieldGroup('Nombre completo','<input id="en" placeholder="Nombre del empleado">')}
+        ${fieldGroup('Puesto','<select id="er">'+ROLES.map(r=>`<option>${r}</option>`).join('')+'</select>')}
+        ${fieldGroup('Salario mensual $MXN','<input id="es" type="number" placeholder="9000" min="2000">')}
+      </div>
+      <div class="info-purple" style="margin-bottom:8px">
+        Salario mínimo 2025: <strong>$7,310/mes</strong> · Vendedor: ~$9,000 · Gerente: ~$18,000–$30,000
+      </div>
+      <button class="btn-primary" id="hire-btn">+ Contratar empleado</button>
+    </div>
+    ${G.employees.length?`
+    <div class="card" style="overflow:hidden;padding:0">
+      <table class="data-table">
+        <thead><tr>
+          <th>Nombre</th><th>Puesto</th>
+          <th style="text-align:right">Salario bruto</th>
+          <th style="text-align:right">Costo total empresa</th><th></th>
+        </tr></thead>
+        <tbody>${G.employees.map(e=>`<tr>
+          <td><strong>${e.name}</strong></td>
+          <td><span style="color:var(--g500)">${e.role}</span></td>
+          <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(e.salary)}</td>
+          <td style="text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--danger)">${$m(e.salary*1.32)}</td>
+          <td style="text-align:center"><button class="btn-danger btn-sm" onclick="if(confirm('¿Seguro que deseas despedir a ${e.name.replace(/'/g,"\\'")}?')){G.employees=G.employees.filter(x=>x.id!==${e.id});render()}">Despedir</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`:
+    `<div style="text-align:center;padding:24px;color:var(--g500);font-size:13px;border:1.5px dashed var(--p200);border-radius:var(--radius-lg)">
+      Sin empleados. Sin personal, el negocio no puede atender clientes eficientemente.
+    </div>`}
+    <div class="info-box" style="margin-top:10px">
+      <strong>Marco legal mexicano:</strong> El costo patronal real incluye cuotas al IMSS, INFONAVIT y SAR (aprox. +32%). Adicional: aguinaldo (15 días/año), vacaciones (6–12 días) y prima vacacional (25%). La simulación incluye el 32% como factor integrado.
+    </div>
+  </div>`;
+  
+  root.querySelector('#hire-btn').onclick=()=>{
+    const n=root.querySelector('#en').value.trim();
+    const r=root.querySelector('#er').value;
+    const s=parseFloat(root.querySelector('#es').value)||0;
+    if(!n||s<2000){ alert('Nombre requerido y salario mínimo $2,000 MXN.'); return; }
+    G.employees.push({id:G.nextEmpId++,name:n,role:r,salary:s});
+    render();
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OPERACIONES
+// ═══════════════════════════════════════════════════════════════════
+function buildOps(root){
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Gastos Fijos y Marketing')}
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Gastos fijos mensuales</div>
+      <div class="grid-2" style="gap:12px;margin-bottom:12px">
+        ${fieldGroup('Renta mensual del local $MXN','<input id="op-rent" type="number" value="'+G.rent+'" min="0">')}
+        ${fieldGroup('Servicios: luz, agua, gas $MXN','<input id="op-util" type="number" value="'+G.utilities+'" min="0">')}
+        ${fieldGroup('Internet + telefonía $MXN','<input id="op-inet" type="number" value="'+G.internet+'" min="0">')}
+        ${fieldGroup('Licencias y permisos $MXN','<input id="op-lic" type="number" value="'+G.licenses+'" min="0">')}
+        ${fieldGroup('Otros gastos fijos $MXN','<input id="op-oth" type="number" value="'+G.otherFixed+'" min="0">')}
+        <div style="display:flex;align-items:flex-end">
+          <div id="fijos-total" style="background:var(--p50);border:1.5px solid var(--p200);border-radius:var(--radius);padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:14px;width:100%;text-align:center;color:var(--p800);font-weight:700">
+            Total: ${$m(fixedTot())}/mes
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" id="save-fixed">Guardar gastos fijos</button>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Estrategia de Marketing</div>
+      <div class="info-purple" style="margin-bottom:10px">
+        Mayor presupuesto en marketing = mayor número de clientes potenciales. El canal elegido multiplica la efectividad.
+      </div>
+      <div class="grid-2" style="gap:12px;margin-bottom:12px">
+        ${fieldGroup('Presupuesto mensual de marketing $MXN','<input id="mk-bud" type="number" value="'+G.mktBudget+'" min="0">')}
+        ${fieldGroup('Canal principal de marketing','<select id="mk-ch"><option value="redes"'+(G.mktChannel==='redes'?' selected':'')+'>📱 Redes sociales (Instagram/TikTok) — Efectividad alta</option><option value="google"'+(G.mktChannel==='google'?' selected':'')+'>🔍 Google Ads / SEO — Efectividad alta</option><option value="influencer"'+(G.mktChannel==='influencer'?' selected':'')+'>🌟 Influencers / Colaboraciones — Efectividad muy alta</option><option value="boca"'+(G.mktChannel==='boca'?' selected':'')+'>💬 Boca a boca / Volantes — Efectividad media</option><option value="radio"'+(G.mktChannel==='radio'?' selected':'')+'>📻 Radio / Espectaculares — Efectividad media</option><option value="nulo"'+(G.mktChannel==='nulo'?' selected':'')+'>🚫 Sin marketing — Sin efecto</option></select>')}
+      </div>
+      <button class="btn-primary" id="save-mkt">Guardar marketing</button>
+    </div>
+    <div class="card-purple" style="margin-bottom:0">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--p800)">Resumen de egresos fijos mensuales estimados</div>
+      ${rowLine('Gastos fijos (renta, servicios, etc.)',$m(fixedTot()))}
+      ${rowLine('Nómina total (con IMSS/INFONAVIT)',$m(payroll()))}
+      ${rowLine('Marketing mensual',$m(G.mktBudget))}
+      <hr class="divider">
+      ${rowLine('BURN RATE TOTAL (sin costos variables)',$m(burnRate()),true,'text-neg')}
+      ${rowLine('Runway con efectivo actual',runway()+' meses',true,'text-purple')}
+    </div>
+  </div>`;
+  
+  root.querySelector('#save-fixed').onclick=()=>{
+    G.rent=parseFloat(root.querySelector('#op-rent').value)||0;
+    G.utilities=parseFloat(root.querySelector('#op-util').value)||0;
+    G.internet=parseFloat(root.querySelector('#op-inet').value)||0;
+    G.licenses=parseFloat(root.querySelector('#op-lic').value)||0;
+    G.otherFixed=parseFloat(root.querySelector('#op-oth').value)||0;
+    root.querySelector('#fijos-total').textContent='Total: '+$m(fixedTot())+'/mes';
+    alert('✅ Gastos fijos actualizados correctamente.');
+  };
+  root.querySelector('#save-mkt').onclick=()=>{
+    G.mktBudget=parseFloat(root.querySelector('#mk-bud').value)||0;
+    G.mktChannel=root.querySelector('#mk-ch').value;
+    alert('✅ Estrategia de marketing actualizada.');
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ADVANCE MONTH
+// ═══════════════════════════════════════════════════════════════════
+function buildAdvance(root){
+  const g=giro(), s=seg();
+  const base=g.base*s.m;
+  const chanMult={'redes':1.2,'boca':0.9,'google':1.3,'radio':1.1,'influencer':1.5,'nulo':0.5}[G.mktChannel]||1.0;
+  const mktMod=0.5+Math.min(1.5,(G.mktBudget/5000)*0.25*chanMult);
+  const stockMod=G.products.length===0?0.2:(G.inventory.length>0?1.0:0.6);
+  const minStaff=Math.max(1,Math.ceil(base/60));
+  const staffMod=G.employees.length>=minStaff?1.0:Math.max(0.4,G.employees.length/minStaff);
+  const satMod=0.6+(G.satisfaction/100)*0.5;
+  const est=Math.round(base*mktMod*stockMod*staffMod*satMod);
+  const estRev=est*avgTicket()*s.p;
+  const estVar=est*avgCost();
+  const estCost=estVar+fixedTot()+payroll()+G.mktBudget;
+  const estProfit=estRev-estCost;
+  
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Avanzar al Siguiente Mes — '+ curMon()+' '+curYear())}
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">✅ Checklist pre-operacional</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${G.products.length>0?`<div class="check-ok"><i class="ti ti-circle-check"></i> Catálogo con ${G.products.length} producto(s) o servicio(s) registrado(s)</div>`:`<div class="check-err"><i class="ti ti-alert-circle"></i> Sin productos — ve a Catálogo antes de avanzar el mes</div>`}
+        ${G.rent>0?`<div class="check-ok"><i class="ti ti-circle-check"></i> Renta configurada: ${$m(G.rent)}/mes</div>`:`<div class="check-warn"><i class="ti ti-alert-triangle"></i> Sin renta — configura en Operaciones (puedes operar sin local)</div>`}
+        ${G.employees.length>=minStaff?`<div class="check-ok"><i class="ti ti-circle-check"></i> Personal suficiente: ${G.employees.length} empleado(s) activos</div>`:`<div class="check-warn"><i class="ti ti-alert-triangle"></i> Personal insuficiente: tienes ${G.employees.length} de ${minStaff} recomendados</div>`}
+        ${G.inventory.length>0?`<div class="check-ok"><i class="ti ti-circle-check"></i> Insumos disponibles en almacén</div>`:`<div class="check-warn"><i class="ti ti-alert-triangle"></i> Sin insumos — considera comprar en la sección Insumos</div>`}
+        ${G.cash>burnRate()?`<div class="check-ok"><i class="ti ti-circle-check"></i> Efectivo suficiente para cubrir gastos fijos estimados</div>`:`<div class="check-err"><i class="ti ti-alert-circle"></i> Efectivo bajo — riesgo de no cubrir gastos fijos este mes</div>`}
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">📊 Proyección estimada (sin factor externo aún)</div>
+      <div class="grid-3" style="gap:10px;margin-bottom:12px">
+        ${kpiBox('Clientes base del giro',$n(base),'','mercado potencial')}
+        ${kpiBox('Clientes proyectados',$n(est),'text-purple','con todos los factores')}
+        ${kpiBox('Varianza esperada','±30%','','aleatoria')}
+      </div>
+      <div style="font-size:12px;color:var(--g500);margin-bottom:8px;font-family:'IBM Plex Mono',monospace">Modificadores activos:</div>
+      <div class="grid-4" style="gap:8px;margin-bottom:12px;font-size:11px;font-family:'IBM Plex Mono',monospace">
+        <div style="background:var(--p50);padding:6px 8px;border-radius:var(--radius);text-align:center">Marketing<br><strong style="color:var(--p700)">${mktMod.toFixed(2)}x</strong></div>
+        <div style="background:var(--p50);padding:6px 8px;border-radius:var(--radius);text-align:center">Inventario<br><strong style="color:${stockMod<0.8?'var(--warn)':'var(--success)'}">${stockMod.toFixed(2)}x</strong></div>
+        <div style="background:var(--p50);padding:6px 8px;border-radius:var(--radius);text-align:center">Personal<br><strong style="color:${staffMod<0.8?'var(--warn)':'var(--success)'}">${staffMod.toFixed(2)}x</strong></div>
+        <div style="background:var(--p50);padding:6px 8px;border-radius:var(--radius);text-align:center">Satisfacción<br><strong style="color:${satMod<0.8?'var(--warn)':'var(--success)'}">${satMod.toFixed(2)}x</strong></div>
+      </div>
+      ${rowLine('Ingresos estimados',$m(estRev),'','text-pos')}
+      ${rowLine('Costos variables estimados',$m(estVar))}
+      ${rowLine('Gastos fijos + nómina + marketing',$m(fixedTot()+payroll()+G.mktBudget))}
+      <hr class="divider">
+      ${rowLine('Resultado estimado',$m(estProfit),true,estProfit>=0?'text-pos':'text-neg')}
+    </div>
+    <div class="info-purple" style="margin-bottom:14px">
+      🎲 Al avanzar el mes se añadirá un <strong>factor externo aleatorio</strong> que puede modificar ingresos y costos. 
+      También se calcularán <strong>IVA neto al SAT</strong> e <strong>ISR provisional</strong>. Los resultados incluyen ±30% de varianza aleatoria.
+    </div>
+    <button class="btn-primary" id="adv-btn" style="width:100%;padding:16px 0;font-size:16px;font-weight:900;letter-spacing:1px">
+      <i class="ti ti-player-play"></i> Avanzar a ${MES[(G.monthIdx+1)%12]} ${2025+Math.floor((G.monthIdx+1)/12)} →
+    </button>
+  </div>`;
+  
+  root.querySelector('#adv-btn').onclick=runMonthAdvance;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MONTH ADVANCE ALGORITHM
+// ═══════════════════════════════════════════════════════════════════
+function runMonthAdvance(){
+  const g=giro(), s=seg();
+  const ev=EVENTS[Math.floor(Math.random()*EVENTS.length)];
+  
+  const base=g.base*s.m;
+  const chanMult={'redes':1.2,'boca':0.9,'google':1.3,'radio':1.1,'influencer':1.5,'nulo':0.5}[G.mktChannel]||1.0;
+  const mktMod=0.5+Math.min(1.5,(G.mktBudget/5000)*0.25*chanMult);
+  const stockMod=G.products.length===0?0.2:(G.inventory.length>0?1.0:0.6);
+  const minStaff=Math.max(1,Math.ceil(base/60));
+  const staffMod=G.employees.length>=minStaff?1.0:Math.max(0.4,G.employees.length/minStaff);
+  const satMod=0.6+(G.satisfaction/100)*0.5;
+  const evMod=1+(ev.rev||0);
+  
+  const theoretical=base*mktMod*stockMod*staffMod*satMod*evMod;
+  const variance=0.7+Math.random()*0.6;
+  const customers=Math.max(0,Math.round(theoretical*variance));
+  
+  const revenue=customers*avgTicket()*s.p;
+  const costMult=1+(ev.cost||0);
+  const varCosts=customers*avgCost()*costMult;
+  const fixed=fixedTot()*costMult;
+  const payrollC=payroll();
+  const mkt=G.mktBudget;
+  const evFixed=ev.fixed||0;
+  
+  // IVA 16%
+  const ivaCol=revenue*0.16;
+  const ivaPaid=varCosts*0.16;
+  const ivaNeto=Math.max(0,ivaCol-ivaPaid);
+  
+  // ISR provisional simplificado (2.5% sobre ingresos como pago provisional)
+  const taxable=revenue-varCosts-fixed-payrollC-mkt-evFixed;
+  const isr=Math.max(0,taxable*0.025);
+  
+  const totalExp=varCosts+fixed+payrollC+mkt+evFixed+ivaNeto+isr;
+  const profit=revenue-totalExp;
+  
+  G.cash+=profit;
+  G.totalRev+=revenue;
+  G.totalExp+=totalExp;
+  G.isrAccum+=isr;
+  G.ivaAccum+=ivaNeto;
+  
+  const newSat=Math.min(100,Math.max(0,
+    G.satisfaction+(stockMod>0.8?2:-4)+(staffMod>0.8?1:-3)+(profit>0?2:-2)
+  ));
+  G.satisfaction=Math.round(newSat);
+  G.consLoss=profit<0?G.consLoss+1:0;
+  
+  const rec={
+    month:MES[G.monthIdx%12], year:2025+Math.floor(G.monthIdx/12),
+    revenue,totalExp,profit,customers,
+    eventIco:ev.ico,eventN:ev.n,cash:G.cash
+  };
+  G.history.push(rec);
+  G.monthIdx++;
+  
+  G.lastResult={revenue,totalExp,profit,customers,ev,
+    varCosts,fixed,payrollC,mkt,evFixed,ivaNeto,isr,
+    cash:G.cash,satisfaction:G.satisfaction,
+    month:rec.month,year:rec.year};
+  
+  // WIN / LOSS conditions
+  if(G.cash<=-G.co.budget*0.5||G.consLoss>=3){
+    G.view='bankrupt';
+  } else if(G.history.length>=24&&G.totalRev>G.co.budget*5){
+    G.view='success';
+  } else {
+    G.view='results';
+  }
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RESULTS SCREEN
+// ═══════════════════════════════════════════════════════════════════
+function buildResults(root){
+  const r=G.lastResult; if(!r) return;
+  const mg=r.revenue>0?((r.profit/r.revenue)*100).toFixed(1):0;
+  
+  const typeStyles={
+    good:'event-good',bad:'event-bad',cost:'event-cost',
+    neutral:'event-neutral',legal:'event-legal',hr:'event-cost'
+  };
+  
+  const advice=r.profit>0
+    ?(r.customers<giro().base*seg().m*0.5
+      ?'Buen resultado financiero, pero tu volumen de clientes está por debajo del potencial. Invierte más en marketing.'
+      :'¡Excelente mes! Mantén el ritmo. Considera reinvertir las ganancias en crecimiento.')
+    :(r.varCosts>r.revenue*0.6
+      ?'Tus costos variables son muy altos vs. ingresos. Revisa y mejora los márgenes de tus productos.'
+      :r.customers<10
+      ?'Muy pocos clientes este mes. Invierte más en marketing y verifica disponibilidad de inventario.'
+      :'Los gastos fijos superan tu nivel de ventas. Reduce costos o enfócate en aumentar el ticket promedio.');
+  
+  root.innerHTML=`
+  <div style="min-height:100vh;background:var(--p900);display:flex;flex-direction:column">
+    <div style="background:var(--p800);padding:12px 20px;text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--p100)">Emprendedor MX</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--p300);margin-top:2px">CIERRE DE MES — ${r.month.toUpperCase()} ${r.year}</div>
+    </div>
+    <div style="flex:1;padding:20px;overflow-y:auto">
+    <div style="max-width:660px;margin:0 auto">
+    <!-- EVENT -->
+    <div class="${typeStyles[r.ev.t]||'event-neutral'} fade-in" style="margin-bottom:14px">
+      <div style="font-size:22px;margin-bottom:4px">${r.ev.ico}</div>
+      <div style="font-size:16px;font-weight:700;font-family:'Playfair Display',serif;margin-bottom:4px">${r.ev.n}</div>
+      <div style="font-size:13px;color:var(--g700)">${r.ev.desc}</div>
+    </div>
+    <!-- RECEIPT -->
+    <div class="receipt fade-in" style="margin-bottom:14px;background:white">
+      <div style="text-align:center;border-bottom:1px dashed var(--p300);padding-bottom:8px;margin-bottom:10px;color:var(--p800);font-size:11px;letter-spacing:1px">
+        ══════ ESTADO DE RESULTADOS ══════<br>${r.month.toUpperCase()} ${r.year} · ${G.co.name.toUpperCase()}
+      </div>
+      <div style="font-size:12px;color:var(--p700);margin-bottom:4px;letter-spacing:.5px;text-transform:uppercase">Ingresos</div>
+      ${rowLine('Ventas a '+$n(r.customers)+' clientes',$m(r.revenue),true,'text-pos')}
+      <div style="font-size:12px;color:var(--danger);margin:8px 0 4px;letter-spacing:.5px;text-transform:uppercase">Egresos</div>
+      ${rowLine('Costo de ventas / COGS',$m(r.varCosts))}
+      ${rowLine('Gastos fijos (renta, servicios, etc.)',$m(r.fixed))}
+      ${rowLine('Nómina total (con IMSS)',$m(r.payrollC))}
+      ${rowLine('Marketing',$m(r.mkt))}
+      ${r.evFixed>0?rowLine('Gasto por evento externo','('+$m(r.evFixed)+')',false,'text-neg'):''}
+      <hr class="divider">
+      ${rowLine('Subtotal egresos operativos',$m(r.varCosts+r.fixed+r.payrollC+r.mkt+r.evFixed))}
+      <div style="font-size:12px;color:var(--gold);margin:8px 0 4px;letter-spacing:.5px;text-transform:uppercase">Impuestos</div>
+      ${rowLine('IVA neto a pagar al SAT (16%)',$m(r.ivaNeto))}
+      ${rowLine('ISR provisional mensual (2.5%)',$m(r.isr))}
+      <hr class="divider">
+      ${rowLine('TOTAL EGRESOS',$m(r.totalExp),true,'text-neg')}
+      <div style="border-top:2px dashed var(--p400);margin-top:10px;padding-top:10px;display:flex;justify-content:space-between;font-size:18px;font-weight:700;font-family:'IBM Plex Mono',monospace">
+        <span>UTILIDAD NETA</span>
+        <span style="color:${r.profit>=0?'var(--success)':'var(--danger)'}">${$m(r.profit)}</span>
+      </div>
+      <div style="border-top:1px dashed var(--p200);margin-top:10px;padding-top:8px">
+        ${rowLine('Nuevo saldo en caja',$m(r.cash),true,r.cash<0?'text-neg':'text-pos')}
+        ${rowLine('Margen neto del mes',mg+'%',false,mg>0?'text-pos':'text-neg')}
+        ${rowLine('Satisfacción del cliente',r.satisfaction+'%')}
+      </div>
+    </div>
+    <!-- ADVICE -->
+    <div style="background:${r.profit>=0?'var(--success-bg)':'var(--danger-bg)'};border:1.5px solid ${r.profit>=0?'var(--success-border)':'var(--danger-border)'};border-radius:var(--radius-lg);padding:12px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:${r.profit>=0?'var(--success)':'var(--danger)'};margin-bottom:4px">
+        ${r.profit>=0?'💡 Retroalimentación positiva':'⚠️ Área de oportunidad'}
+      </div>
+      <div style="font-size:13px;color:var(--g700)">${advice}</div>
+    </div>
+    <button class="btn-primary" onclick="G.view='game';G.tab='dash';render()" style="width:100%;padding:14px 0;font-size:15px;font-weight:900;letter-spacing:.5px">
+      Continuar al panel → ${MES[G.monthIdx%12]} ${2025+Math.floor(G.monthIdx/12)}
+    </button>
+    </div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ANÁLISIS
+// ═══════════════════════════════════════════════════════════════════
+function buildAnalysis(root){
+  if(G.history.length===0){
+    root.innerHTML=secTitle('Análisis y Punto de Venta')+`
+    <div style="text-align:center;padding:40px;color:var(--g500);font-size:14px;border:1.5px dashed var(--p200);border-radius:var(--radius-lg)">
+      Sin historial todavía. Avanza al menos un mes para ver el análisis de tu negocio.
+    </div>`;
+    return;
+  }
+  
+  const totR=G.history.reduce((s,h)=>s+h.revenue,0);
+  const totE=G.history.reduce((s,h)=>s+h.totalExp,0);
+  const totP=G.totalRev-G.totalExp;
+  const best=G.history.reduce((a,b)=>b.profit>a.profit?b:a);
+  const worst=G.history.reduce((a,b)=>b.profit<a.profit?b:a);
+  const profitable=G.history.filter(h=>h.profit>=0).length;
+  const avgMargin=totR>0?(totP/totR*100).toFixed(1):0;
+  
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Análisis y Punto de Venta')}
+    <div class="grid-4" style="margin-bottom:14px">
+      ${kpiBox('Ingresos totales',$m(totR),'text-pos',G.history.length+' meses')}
+      ${kpiBox('Egresos totales',$m(totE),'text-neg','')}
+      ${kpiBox('Resultado acumulado',$m(totP),totP>=0?'text-pos':'text-neg','')}
+      ${kpiBox('Meses rentables',profitable+'/'+G.history.length,'',((profitable/G.history.length)*100).toFixed(0)+'% del tiempo')}
+    </div>
+    <div class="grid-3" style="margin-bottom:14px">
+      ${kpiBox('Mejor mes',best.month+' '+best.year,'text-pos',$m(best.profit))}
+      ${kpiBox('Peor mes',worst.month+' '+worst.year,'text-neg',$m(worst.profit))}
+      ${kpiBox('Margen neto promedio',avgMargin+'%',avgMargin>0?'text-pos':'text-neg','')}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Evolución mensual — Ingresos vs Egresos vs Utilidad</div>
+      <canvas id="chart-main" style="max-height:220px"></canvas>
+    </div>
+    ${G.products.length?`
+    <div class="card" style="margin-bottom:12px;overflow:hidden;padding:0">
+      <div style="padding:14px 14px 10px;font-size:14px;font-weight:700;color:var(--p700)">Punto de Venta — Análisis de márgenes por producto</div>
+      <table class="data-table">
+        <thead><tr>
+          <th>Producto / Servicio</th><th>Tipo</th>
+          <th style="text-align:right">Precio</th><th style="text-align:right">Costo</th>
+          <th style="text-align:right">Margen</th><th style="text-align:center">Evaluación</th>
+        </tr></thead>
+        <tbody>${G.products.map(p=>{
+          const mg=((p.price-p.cost)/p.price*100).toFixed(1);
+          const ev2=mg>50?['Excelente','badge-green']:mg>30?['Bueno','badge-purple']:mg>15?['Aceptable','badge-amber']:['Bajo','badge-red'];
+          const mc=mg>40?'text-pos':mg>25?'text-purple':mg>15?'text-warn':'text-neg';
+          return `<tr>
+            <td><strong>${p.name}</strong></td>
+            <td>${badge(p.cat==='servicio'?'Servicio':'Producto',p.cat==='servicio'?'badge-purple':'badge-gray')}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(p.price)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$m(p.cost)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700" class="${mc}">${mg}%</td>
+            <td style="text-align:center">${badge(ev2[0],ev2[1])}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`:''}
+    <div class="card" style="overflow:hidden;padding:0">
+      <div style="padding:14px 14px 10px;font-size:14px;font-weight:700;color:var(--p700)">Historial de eventos externos</div>
+      <div style="max-height:220px;overflow-y:auto">
+        <table class="data-table">
+          <thead><tr><th>Mes</th><th>Evento</th><th style="text-align:right">Clientes</th><th style="text-align:right">Utilidad</th><th style="text-align:right">Caja</th></tr></thead>
+          <tbody>${G.history.map(h=>`<tr>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;white-space:nowrap">${h.month} ${h.year}</td>
+            <td style="font-size:12px">${h.eventIco} ${h.eventN}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace">${$n(h.customers)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:600" class="${h.profit>=0?'text-pos':'text-neg'}">${$m(h.profit)}</td>
+            <td style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px" class="${h.cash>=0?'':'text-neg'}">${$m(h.cash)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+  
+  setTimeout(()=>{
+    const cv=document.getElementById('chart-main');
+    if(!cv||!window.Chart) return;
+    try{
+      if(G.chartRef) G.chartRef.destroy();
+      const labels=G.history.map(h=>h.month.substring(0,3)+'\''+h.year.toString().substring(2));
+      G.chartRef=new Chart(cv,{
+        type:'bar',
+        data:{
+          labels,
+          datasets:[
+            {label:'Ingresos',data:G.history.map(h=>Math.round(h.revenue)),backgroundColor:'rgba(6,95,70,.65)',borderRadius:3,order:2},
+            {label:'Egresos', data:G.history.map(h=>Math.round(h.totalExp)),backgroundColor:'rgba(153,27,27,.45)',borderRadius:3,order:3},
+            {label:'Utilidad',data:G.history.map(h=>Math.round(h.profit)),backgroundColor:G.history.map(h=>h.profit>=0?'rgba(76,29,149,.7)':'rgba(220,38,38,.7)'),type:'bar',borderRadius:3,order:1},
+          ]
+        },
+        options:{
+          responsive:true,
+          plugins:{legend:{labels:{font:{size:11},padding:16}},tooltip:{callbacks:{label:c=>' '+$m(c.raw)}}},
+          scales:{
+            y:{ticks:{font:{size:10},callback:v=>'$'+Math.round(v/1000)+'k'},grid:{color:'rgba(0,0,0,.05)'}},
+            x:{ticks:{font:{size:9}}}
+          }
+        }
+      });
+    }catch(e){console.warn(e);}
+  },50);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FISCAL
+// ═══════════════════════════════════════════════════════════════════
+function buildFiscal(root){
+  const estAnnualISR=Math.max(0,(G.totalRev-G.totalExp)*0.30);
+  root.innerHTML=`
+  <div class="fade-in">
+    ${secTitle('Obligaciones Fiscales y Contables')}
+    <div class="grid-2" style="margin-bottom:14px">
+      ${kpiBox('IVA acumulado pagado al SAT',$m(G.ivaAccum),'text-neg','16% neto mensual')}
+      ${kpiBox('ISR provisional acumulado',$m(G.isrAccum),'text-neg','pagos mensuales estimados')}
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:12px">Marco fiscal mexicano (simplificado)</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--g700)">
+        <strong style="color:var(--p700)">IVA — Impuesto al Valor Agregado</strong><br>
+        Tasa general: 16%. Se cobra al cliente en cada venta y se descuenta el IVA pagado a proveedores. La diferencia se entera al SAT a más tardar el día 17 del mes siguiente.<br>
+        <em>En la simulación: IVA neto = 16% × ingresos − 16% × costos variables.</em>
+        <hr class="divider">
+        <strong style="color:var(--p700)">ISR — Impuesto Sobre la Renta</strong><br>
+        Persona moral: 30% sobre utilidad fiscal anual. Los pagos provisionales mensuales se calculan sobre los ingresos acumulados. Declaración anual en marzo del año siguiente.<br>
+        <em>En la simulación: 2.5% de la utilidad antes de impuestos como estimación mensual.</em>
+        <hr class="divider">
+        <strong style="color:var(--p700)">IMSS / INFONAVIT / SAR</strong><br>
+        Las cuotas patronales representan aproximadamente el 32% adicional sobre el salario bruto. Incluye: seguro de enfermedades, maternidad, invalidez, vida, guarderías, INFONAVIT y SAR.<br>
+        <em>En la simulación: incluido dentro del costo total de nómina (×1.32).</em>
+        <hr class="divider">
+        <strong style="color:var(--p700)">RESICO — Régimen Simplificado de Confianza</strong><br>
+        Para personas físicas con ingresos hasta $3.5M/año. Tasas del 1% al 2.5% sobre ingresos. Simplifica las obligaciones contables y de declaración.
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:10px">Calendario de obligaciones fiscales</div>
+      ${rowLine('Declaración y pago de IVA mensual','Día 17 del mes siguiente')}
+      ${rowLine('Pago ISR provisional mensual','Día 17 del mes siguiente')}
+      ${rowLine('Pago IMSS patronal (bimestral)','Día 17 de feb, abr, jun, ago, oct, dic')}
+      ${rowLine('Declaración anual ISR personas morales','Marzo del siguiente año')}
+      ${rowLine('Declaración anual personas físicas','Abril del siguiente año')}
+      ${rowLine('CFDI por cada venta / ingreso','Inmediato o a más tardar 72 hrs')}
+    </div>
+    <div class="card-purple">
+      <div style="font-size:14px;font-weight:700;color:var(--p800);margin-bottom:10px">Estimación fiscal acumulada de tu negocio</div>
+      ${rowLine('Ingresos acumulados',$m(G.totalRev))}
+      ${rowLine('Egresos acumulados',$m(G.totalExp))}
+      ${rowLine('Utilidad gravable estimada',$m(Math.max(0,G.totalRev-G.totalExp)))}
+      <hr class="divider">
+      ${rowLine('ISR pagado (provisionales)',$m(G.isrAccum))}
+      ${rowLine('ISR anual estimado (30% sobre utilidad)',$m(estAnnualISR))}
+      ${rowLine('Diferencia por pagar / a favor',$m(estAnnualISR-G.isrAccum),true,estAnnualISR>G.isrAccum?'text-neg':'text-pos')}
+      <hr class="divider">
+      ${rowLine('IVA neto pagado acumulado',$m(G.ivaAccum))}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// END SCREENS
+// ═══════════════════════════════════════════════════════════════════
+function buildEnd(root,type){
+  const isBankrupt=type==='bankrupt';
+  const totP=G.totalRev-G.totalExp;
+  root.innerHTML=`
+  <div style="min-height:100vh;background:${isBankrupt?'linear-gradient(135deg,#7F1D1D,#991B1B)':'linear-gradient(135deg,var(--p800),var(--p500))'};display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="background:white;border-radius:var(--radius-xl);padding:32px;max-width:580px;width:100%;border:3px solid ${isBankrupt?'var(--danger-border)':'var(--p200)'}">
+      <div style="text-align:center;font-size:72px;margin-bottom:8px">${isBankrupt?'💸':'🏆'}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:900;text-align:center;color:${isBankrupt?'var(--danger)':'var(--p800)'};margin-bottom:8px">
+        ${isBankrupt?'Quiebra técnica':'¡Emprendedor exitoso!'}
+      </div>
+      <div style="font-size:14px;color:var(--g500);text-align:center;margin-bottom:20px;line-height:1.7">
+        ${isBankrupt?
+          `<strong>${G.co.name}</strong> tuvo que cerrar sus puertas. El flujo de caja negativo superó la capacidad de recuperación. Cada fracaso es la mejor escuela de negocios.`:
+          `¡Felicitaciones! <strong>${G.co.name}</strong> logró sostenerse y crecer por ${G.monthIdx} meses. Tus decisiones construyeron un negocio rentable en el mercado mexicano.`
+        }
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700;color:var(--p700);margin-bottom:10px;font-family:'Playfair Display',serif">Resumen final de tu empresa</div>
+        ${rowLine('Empresa',G.co.name)}
+        ${rowLine('Giro',giro().n)}
+        ${rowLine('Meses operando',G.monthIdx+' meses')}
+        ${rowLine('Ingresos totales',$m(G.totalRev),false,'text-pos')}
+        ${rowLine('Egresos totales',$m(G.totalExp),false,'text-neg')}
+        ${rowLine('Resultado neto',$m(totP),true,totP>=0?'text-pos':'text-neg')}
+        ${rowLine('Capital final en caja',$m(G.cash),true,G.cash>=0?'text-pos':'text-neg')}
+        ${rowLine('Satisfacción final del cliente',G.satisfaction+'%')}
+      </div>
+      <div style="background:${isBankrupt?'var(--danger-bg)':'var(--success-bg)'};border:1.5px solid ${isBankrupt?'var(--danger-border)':'var(--success-border)'};border-radius:var(--radius-lg);padding:14px;margin-bottom:16px;font-size:12px;color:${isBankrupt?'var(--danger)':'var(--success)'};line-height:1.8">
+        <strong>${isBankrupt?'Posibles causas del cierre:':'Claves de tu éxito:'}</strong><br>
+        ${isBankrupt?
+          '→ Costos fijos demasiado altos para el volumen de ventas<br>→ Insuficiente inversión en marketing<br>→ Márgenes de producto por debajo del punto de equilibrio<br>→ Acumulación de meses con pérdidas sin corrección':
+          '→ Control de costos y márgenes saludables<br>→ Inversión estratégica en marketing<br>→ Equipo adecuado al volumen de clientes<br>→ Resiliencia ante factores externos adversos'
+        }
+      </div>
+      <button class="btn-${isBankrupt?'danger':'primary'}" onclick="resetGame()" style="width:100%;padding:14px 0;font-size:15px;font-weight:900;letter-spacing:.5px">
+        Iniciar nuevo negocio desde cero →
+      </button>
+    </div>
+  </div>`;
+}
+
+function resetGame(){
+  if(G.chartRef){ try{G.chartRef.destroy();}catch(e){} }
+  G={
+    view:'setup1',tab:'dash',
+    co:{name:'',giro:'',seg:'med',city:'Guadalajara',desc:'',budget:100000},
+    cash:0,debt:0,monthIdx:0,
+    products:[],inventory:[],employees:[],
+    rent:0,utilities:0,internet:500,licenses:500,otherFixed:0,
+    mktBudget:2000,mktChannel:'redes',
+    history:[],lastResult:null,
+    satisfaction:70,consLoss:0,
+    totalRev:0,totalExp:0,isrAccum:0,ivaAccum:0,
+    nextProdId:1,nextEmpId:1,nextInvId:1,chartRef:null,
+  };
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
